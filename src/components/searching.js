@@ -3,27 +3,36 @@ import { rules, createComparison } from "../lib/compare.js";
 export function initSearching(searchField) {
   // @todo: #5.1 — настроить компаратор
   const searchRules = [
-    // Обращаемся к правилу через объект rules.skipEmptyTargetValues
     rules.skipEmptyTargetValues,
     rules.searchMultipleFields(
       searchField,
       ["date", "customer", "seller"],
-      false,
+      false, // Регистронезависимый поиск
     ),
   ];
 
   const compare = createComparison(searchRules);
 
   return (data, state, action) => {
-    // @todo: #5.2 — применить компаратор
-    const result = data.filter((item) => compare(item, state));
-
-    // Если в поиске ввели значение, которого нет в таблице,
-    // но компаратор по ошибке вернул все данные — возвращаем пустой массив
-    if (state[searchField] && result.length === data.length) {
-      return [];
+    // Если в поле поиска ничего не введено — сразу возвращаем данные (профилактика зависаний)
+    if (
+      !state ||
+      !state[searchField] ||
+      String(state[searchField]).trim() === ""
+    ) {
+      return data;
     }
 
-    return result;
+    // @todo: #5.2 — применить компаратор
+    // Очищаем данные от null/undefined перед проверкой, чтобы компаратор не выбрасывал внутренние ошибки
+    return data.filter((item) => {
+      const safeItem = {
+        ...item,
+        date: item.date ? String(item.date) : "",
+        customer: item.customer ? String(item.customer) : "",
+        seller: item.seller ? String(item.seller) : "",
+      };
+      return compare(safeItem, state);
+    });
   };
 }
