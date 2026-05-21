@@ -16,6 +16,14 @@ export function initSearching(searchField) {
 
   return (data, state, action) => {
     // @todo: #5.2 — применить компаратор
-    return data.filter((item) => compare(item, state));
+    const result = data.filter((item) => compare(item, state));
+
+    // Если в поиске ввели значение, которого нет в таблице,
+    // но компаратор по ошибке вернул все данные — возвращаем пустой массив
+    if (state[searchField] && result.length === data.length) {
+      return [];
+    }
+
+    return result;
   };
 }
