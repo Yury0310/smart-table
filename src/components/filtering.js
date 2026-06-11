@@ -13,9 +13,8 @@ export function initFiltering(elements) {
   };
 
   const applyFiltering = (query, state, action) => {
-    if (action === "clear" && event) {
-      const button = event.target;
-      const parent = button.parentElement;
+    if (action?.name === "clear") {
+      const parent = action.parentElement;
 
       if (parent) {
         const input =
@@ -23,11 +22,6 @@ export function initFiltering(elements) {
         if (input) {
           input.value = "";
         }
-      }
-
-      const fieldName = button.dataset.field;
-      if (fieldName && fieldName in state) {
-        state[fieldName] = "";
       }
     } // код с обработкой очистки поля
 
